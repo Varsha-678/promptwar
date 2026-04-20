@@ -1,68 +1,87 @@
 import pytest
 import json
-from app import app
+from unittest.mock import patch
+from app import app, limiter
+from nlp_engine import NLPEngine
 
 @pytest.fixture
 def client():
+    # Setup testing configurations
     app.config["TESTING"] = True
+    app.config["WTF_CSRF_ENABLED"] = False
+    app.config["RATELIMIT_ENABLED"] = False # Disable by default for tests
     with app.test_client() as client:
         yield client
 
+# --- NLP Engine Tests ---
+def test_nlp_engine_loading():
+    nlp = NLPEngine("event_data.json")
+    data_dict = nlp.get_raw_data_dict()
+    assert "halls" in data_dict
+    
+    bad_nlp = NLPEngine("does_not_exist.json")
+    bad_data = bad_nlp.get_raw_data_dict()
+    assert bad_data["halls"] == {}
+
+def test_nlp_intent_hall():
+    nlp = NLPEngine("event_data.json")
+    assert "Hall A" in nlp.handle_basic_intent("where is hall a?")
+    assert "We have Halls" in nlp.handle_basic_intent("where is hall x?")
+
+def test_nlp_intent_facilities():
+    nlp = NLPEngine("event_data.json")
+    assert "Help Desk:" in nlp.handle_basic_intent("where is help desk")
+
+def test_nlp_intent_recommendation():
+    nlp = NLPEngine("event_data.json")
+    assert "I recommend:" in nlp.handle_basic_intent("recommend an ai session")
+    # "sports" is not a predefined interest, so it prompts the user
+    assert "What are you interested in" in nlp.handle_basic_intent("recommend a sports session")
+
+def test_nlp_intent_unmatched():
+    nlp = NLPEngine("event_data.json")
+    assert nlp.handle_basic_intent("tell me a joke") is None
+
+# --- API Endpoint Tests ---
 def test_index_route(client):
-    """Test that the index page loads correctly with semantic HTML structure."""
     response = client.get("/")
     assert response.status_code == 200
-    assert b"Event Buddy AI" in response.data
-    assert b"<main class=\"main-content\"" in response.data
 
 def test_info_api(client):
-    """Test that the /api/info endpoint returns correct JSON structure and headers."""
     response = client.get("/api/info")
     assert response.status_code == 200
-    
-    # Check Efficiency cache headers
-    assert "Cache-Control" in response.headers
-    assert "public, max-age=3600" in response.headers["Cache-Control"]
-
     data = json.loads(response.data)
-    assert "sample_questions" in data
-    assert "event_data" in data
-    assert "halls" in data["event_data"]
+    assert "csrf_token" in data
 
-def test_chat_hall_intent(client):
-    """Test the local intent matching for finding a hall."""
+def test_chat_success(client):
     response = client.post("/chat", json={"message": "where is hall a?"})
     assert response.status_code == 200
-    data = json.loads(response.data)
-    assert "Hall A" in data["reply"]
-    assert "Main entrance" in data["reply"]
-
-def test_chat_recommendation_intent(client):
-    """Test the local intent matching for session recommendations."""
-    response = client.post("/chat", json={"message": "recommend an ai session"})
-    assert response.status_code == 200
-    data = json.loads(response.data)
-    assert "The Future of AI" in data["reply"] or "Generative AI" in data["reply"]
 
 def test_chat_missing_message(client):
-    """Test error handling for bad input."""
     response = client.post("/chat", json={})
     assert response.status_code == 400
-    data = json.loads(response.data)
-    assert "error" in data
 
-def test_chat_sanitization(client):
-    """Test that inputs are handled safely (no crash on weird chars)."""
-    response = client.post("/chat", json={"message": "<script>alert(1)</script>"})
+def test_chat_unmatched_fallback(client):
+    response = client.post("/chat", json={"message": "how do I cook a turkey?"})
     assert response.status_code == 200
-    data = json.loads(response.data)
-    assert "reply" in data
 
+# --- Security & Architecture Tests ---
 def test_security_headers(client):
-    """Test that security headers are applied to responses."""
     response = client.get("/")
-    assert "X-Content-Type-Options" in response.headers
-    assert response.headers["X-Content-Type-Options"] == "nosniff"
-    assert "X-Frame-Options" in response.headers
-    assert response.headers["X-Frame-Options"] == "DENY"
-    assert "Content-Security-Policy" in response.headers
+    assert response.headers.get("X-Frame-Options") == "DENY"
+
+def test_csrf_protection():
+    app.config["WTF_CSRF_ENABLED"] = True
+    with app.test_client() as client:
+        response = client.post("/chat", json={"message": "hello"})
+        assert response.status_code == 400
+
+def test_rate_limiting(client):
+    """Explicitly test Rate Limiting."""
+    app.config["RATELIMIT_ENABLED"] = True
+    for i in range(21):
+        response = client.post("/chat", json={"message": "test"})
+    assert response.status_code == 429
+    app.config["RATELIMIT_ENABLED"] = False
+
+

@@ -1,18 +1,22 @@
 /**
  * Event Buddy AI Frontend Logic
- * Handles API interactions, UI updates, and chat rendering.
+ * Handles API interactions, UI updates, CSRF token management, and chat rendering.
  */
 document.addEventListener('DOMContentLoaded', () => {
     const chatForm = document.getElementById('chat-form');
     const userInput = document.getElementById('user-input');
+    const csrfInput = document.getElementById('csrf_token');
     const messagesContainer = document.getElementById('chat-messages');
     const sampleQuestionsContainer = document.getElementById('sample-questions');
     const infoCardsContainer = document.getElementById('info-cards-container');
 
-    // Fetch initial event info on page load
+    // Fetch initial event info and CSRF token on page load
     fetch('/api/info')
         .then(response => response.json())
         .then(data => {
+            if(data.csrf_token) {
+                csrfInput.value = data.csrf_token;
+            }
             renderSampleQuestions(data.sample_questions);
             renderInfoCards(data.event_data);
         })
@@ -88,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const message = userInput.value.trim();
+        const csrfToken = csrfInput.value;
         if (!message) return;
 
         // Add user message to UI
@@ -100,14 +105,22 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // Security: Pass CSRF Token in header
+                },
                 body: JSON.stringify({ message })
             });
             const data = await response.json();
             
             removeElement(typingId);
-            if (data.reply) {
+            
+            if (response.status === 429) {
+                appendMessage("You are sending messages too fast. Please slow down.", 'ai');
+            } else if (data.reply) {
                 appendMessage(data.reply, 'ai');
+            } else if (data.error) {
+                appendMessage(`Error: ${data.error}`, 'ai');
             } else {
                 appendMessage("Sorry, I didn't understand that.", 'ai');
             }
@@ -141,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         div.id = id;
         div.className = 'message ai-message typing-indicator';
         div.textContent = 'Thinking...';
+        div.setAttribute('aria-hidden', 'true');
         messagesContainer.appendChild(div);
         scrollToBottom();
         return id;

@@ -20,8 +20,7 @@
             <!-- Left Column: Info Cards -->
             <section class="info-section" aria-labelledby="quick-info-heading">
                 <h2 id="quick-info-heading">Quick Info</h2>
-                <div id="info-cards-container" class="cards-grid">
-                    <!-- Cards injected via JS -->
+                <div id="info-cards-container" class="cards-grid" aria-live="polite">
                     <div class="loading-state" role="status">Loading event data...</div>
                 </div>
             </section>
@@ -29,8 +28,8 @@
             <!-- Right Column: Chat Interface -->
             <section class="chat-section" aria-label="Chat Interface">
                 <div class="chat-window">
-                    <!-- ARIA Live region so screen readers announce new AI responses -->
-                    <div id="chat-messages" class="messages-container" aria-live="polite">
+                    <!-- ARIA Log role is best for live-updating message lists -->
+                    <div id="chat-messages" class="messages-container" role="log" aria-live="polite" aria-relevant="additions">
                         <div class="message ai-message">
                             <p>Hi! I'm Event Buddy. Need to find a hall, grab some food, or find a session?</p>
                         </div>
@@ -41,7 +40,12 @@
                     </div>
 
                     <form id="chat-form" class="input-area">
-                        <input type="text" id="user-input" placeholder="Ask me anything about the event..." autocomplete="off" aria-label="Chat input">
+                        <!-- Hidden CSRF token will be injected here via JS -->
+                        <input type="hidden" id="csrf_token" name="csrf_token" value="">
+                        
+                        <label for="user-input" class="sr-only">Type your message to Event Buddy</label>
+                        <input type="text" id="user-input" name="user-input" placeholder="Ask me anything about the event..." autocomplete="off">
+                        
                         <button type="submit" aria-label="Send message">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </button>

@@ -1,13 +1,13 @@
 :root {
     --bg-dark: #0f172a;
-    --bg-card: rgba(30, 41, 59, 0.7);
-    --text-primary: #ffffff; /* Increased contrast from #f8fafc */
-    --text-secondary: #cbd5e1; /* Increased contrast from #94a3b8 */
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
-    --user-msg: #2563eb; /* Darker blue for better contrast with white text */
-    --ai-msg: rgba(51, 65, 85, 0.9); /* More opaque for contrast */
-    --glass-border: rgba(255, 255, 255, 0.2); /* Slightly more visible border */
+    --bg-card: rgba(30, 41, 59, 0.9); /* Darker for higher contrast */
+    --text-primary: #ffffff; /* WCAG AAA Contrast against bg-card */
+    --text-secondary: #e2e8f0; /* Brighter for contrast */
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --user-msg: #1e40af; /* Darker blue to ensure white text meets 7:1 ratio */
+    --ai-msg: #334155; /* Solid color for exact contrast math */
+    --glass-border: rgba(255, 255, 255, 0.3);
 }
 
 * {
@@ -16,9 +16,22 @@
     padding: 0;
 }
 
-/* Accessibility: Keyboard Navigation */
+/* Accessibility: Screen Reader Only Class */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Accessibility: Keyboard Navigation Focus */
 *:focus-visible {
-    outline: 3px solid #60a5fa;
+    outline: 4px solid #93c5fd;
     outline-offset: 2px;
 }
 
@@ -49,7 +62,7 @@ body {
 .hero h1 {
     font-size: 2.5rem;
     font-weight: 700;
-    background: linear-gradient(to right, #60a5fa, #a78bfa);
+    background: linear-gradient(to right, #93c5fd, #c4b5fd);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
@@ -116,12 +129,12 @@ body {
 .info-card h3 {
     margin-bottom: 0.5rem;
     font-size: 1.1rem;
-    color: #e2e8f0; /* brighter heading */
+    color: #ffffff;
 }
 
 .info-card p {
     color: var(--text-secondary);
-    font-size: 0.95rem; /* slightly larger for readability */
+    font-size: 0.95rem;
     line-height: 1.5;
 }
 
@@ -177,7 +190,7 @@ body {
     align-self: flex-end;
     background: var(--user-msg);
     border-bottom-right-radius: 4px;
-    color: white; /* Ensure text is white against blue bg */
+    color: white; 
 }
 
 .typing-indicator {
@@ -195,7 +208,7 @@ body {
 
 .question-chip {
     background: transparent;
-    border: 1px solid var(--accent);
+    border: 1px solid #93c5fd;
     color: var(--text-primary);
     padding: 0.5rem 1rem;
     border-radius: 20px;
@@ -206,6 +219,7 @@ body {
 
 .question-chip:hover {
     background: var(--accent);
+    border-color: var(--accent);
 }
 
 .input-area {
@@ -213,12 +227,12 @@ body {
     padding: 1.5rem;
     gap: 0.75rem;
     border-top: 1px solid var(--glass-border);
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(15, 23, 42, 0.8);
 }
 
-.input-area input {
+.input-area input[type="text"] {
     flex: 1;
-    background: var(--bg-dark);
+    background: #1e293b;
     border: 1px solid var(--glass-border);
     color: var(--text-primary);
     padding: 1rem;
@@ -228,8 +242,8 @@ body {
     transition: border-color 0.2s;
 }
 
-.input-area input:focus {
-    border-color: var(--accent);
+.input-area input[type="text"]:focus {
+    border-color: #93c5fd;
 }
 
 .input-area button {
