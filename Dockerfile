@@ -1,6 +1,9 @@
 # Use a lightweight python image
 FROM python:3.11-slim
 
+# Create a non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -16,6 +19,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
+
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
 
 # Expose the port (Cloud Run sets the PORT env var)
 ENV PORT=8080

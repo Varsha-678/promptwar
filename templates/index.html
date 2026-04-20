@@ -11,38 +11,39 @@
     <div class="app-container">
         <!-- Hero Section -->
         <header class="hero">
-            <h1>Event Buddy AI <span class="sparkle">✨</span></h1>
+            <h1>Event Buddy AI <span class="sparkle" aria-hidden="true">✨</span></h1>
             <p>Your smart guide for the physical event experience.</p>
         </header>
 
-        <!-- Main Layout -->
-        <main class="main-content">
+        <!-- Main Layout with Accessibility Role -->
+        <main class="main-content" role="main">
             <!-- Left Column: Info Cards -->
-            <section class="info-section">
-                <h2>Quick Info</h2>
+            <section class="info-section" aria-labelledby="quick-info-heading">
+                <h2 id="quick-info-heading">Quick Info</h2>
                 <div id="info-cards-container" class="cards-grid">
                     <!-- Cards injected via JS -->
-                    <div class="loading-state">Loading event data...</div>
+                    <div class="loading-state" role="status">Loading event data...</div>
                 </div>
             </section>
 
             <!-- Right Column: Chat Interface -->
-            <section class="chat-section">
+            <section class="chat-section" aria-label="Chat Interface">
                 <div class="chat-window">
-                    <div id="chat-messages" class="messages-container">
+                    <!-- ARIA Live region so screen readers announce new AI responses -->
+                    <div id="chat-messages" class="messages-container" aria-live="polite">
                         <div class="message ai-message">
                             <p>Hi! I'm Event Buddy. Need to find a hall, grab some food, or find a session?</p>
                         </div>
                     </div>
                     
-                    <div class="sample-questions" id="sample-questions">
+                    <div class="sample-questions" id="sample-questions" aria-label="Sample Questions">
                         <!-- Chips injected via JS -->
                     </div>
 
                     <form id="chat-form" class="input-area">
                         <input type="text" id="user-input" placeholder="Ask me anything about the event..." autocomplete="off" aria-label="Chat input">
                         <button type="submit" aria-label="Send message">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </button>
                     </form>
                 </div>

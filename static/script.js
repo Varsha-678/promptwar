@@ -1,3 +1,7 @@
+/**
+ * Event Buddy AI Frontend Logic
+ * Handles API interactions, UI updates, and chat rendering.
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const chatForm = document.getElementById('chat-form');
     const userInput = document.getElementById('user-input');
@@ -5,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sampleQuestionsContainer = document.getElementById('sample-questions');
     const infoCardsContainer = document.getElementById('info-cards-container');
 
-    // Fetch initial info
+    // Fetch initial event info on page load
     fetch('/api/info')
         .then(response => response.json())
         .then(data => {
@@ -14,9 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => {
             console.error("Failed to load info", err);
-            infoCardsContainer.innerHTML = '<div class="loading-state">Failed to load event data.</div>';
+            infoCardsContainer.innerHTML = '<div class="loading-state" role="alert">Failed to load event data.</div>';
         });
 
+    /**
+     * Renders clickable sample question chips.
+     * @param {string[]} questions - Array of sample question strings.
+     */
     function renderSampleQuestions(questions) {
         sampleQuestionsContainer.innerHTML = '';
         questions.forEach(q => {
@@ -32,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /**
+     * Renders information cards for upcoming sessions and facilities.
+     * @param {Object} data - The event data object.
+     */
     function renderInfoCards(data) {
         infoCardsContainer.innerHTML = '';
         
@@ -72,16 +84,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Handle form submission
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const message = userInput.value.trim();
         if (!message) return;
 
-        // Add user message
+        // Add user message to UI
         appendMessage(message, 'user');
         userInput.value = '';
 
-        // Add typing indicator
+        // Add loading indicator
         const typingId = appendTypingIndicator();
 
         try {
@@ -99,20 +112,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 appendMessage("Sorry, I didn't understand that.", 'ai');
             }
         } catch (err) {
-            console.error(err);
+            console.error("Chat API Error:", err);
             removeElement(typingId);
             appendMessage("Sorry, there was an error connecting to the server.", 'ai');
         }
     });
 
+    /**
+     * Appends a message bubble to the chat container.
+     * @param {string} text - The message text.
+     * @param {'user'|'ai'} sender - The sender type.
+     */
     function appendMessage(text, sender) {
         const div = document.createElement('div');
         div.className = `message ${sender}-message`;
-        div.innerHTML = `<p>${text}</p>`;
+        div.innerHTML = `<p>${text}</p>`; // Basic injection, backend handles sanitization
         messagesContainer.appendChild(div);
         scrollToBottom();
     }
 
+    /**
+     * Appends a temporary "Thinking..." indicator.
+     * @returns {string} The ID of the typing indicator element.
+     */
     function appendTypingIndicator() {
         const id = 'typing-' + Date.now();
         const div = document.createElement('div');
@@ -124,11 +146,18 @@ document.addEventListener('DOMContentLoaded', () => {
         return id;
     }
 
+    /**
+     * Removes an element by ID.
+     * @param {string} id - The element ID.
+     */
     function removeElement(id) {
         const el = document.getElementById(id);
         if (el) el.remove();
     }
 
+    /**
+     * Scrolls the chat container to the bottom.
+     */
     function scrollToBottom() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
