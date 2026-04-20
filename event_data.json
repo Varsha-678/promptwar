@@ -1,0 +1,20 @@
+{
+  "halls": {
+    "Hall A": "Main entrance, ground floor. Hosts keynote sessions.",
+    "Hall B": "First floor, east wing. Hosts AI and Tech sessions.",
+    "Hall C": "First floor, west wing. Hosts Design sessions.",
+    "Hall D": "Second floor. Hosts Startup and Business sessions."
+  },
+  "sessions": [
+    {"title": "The Future of AI", "time": "10:00 AM", "hall": "Hall B", "tag": "AI"},
+    {"title": "Building Startup MVPs", "time": "11:30 AM", "hall": "Hall D", "tag": "Startup"},
+    {"title": "UI/UX Trends 2026", "time": "01:00 PM", "hall": "Hall C", "tag": "Design"},
+    {"title": "Generative AI in Production", "time": "02:30 PM", "hall": "Hall B", "tag": "AI"},
+    {"title": "Pitching to Investors", "time": "04:00 PM", "hall": "Hall D", "tag": "Startup"}
+  ],
+  "facilities": {
+    "help desk": "Main lobby, near the entrance.",
+    "food": "Food Court 1 (Ground floor, north wing) and Food Court 2 (Second floor balcony).",
+    "washrooms": "Near every hall exit and next to the food courts."
+  }
+}
